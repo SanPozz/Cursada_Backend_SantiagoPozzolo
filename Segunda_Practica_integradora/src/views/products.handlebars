@@ -1,0 +1,33 @@
+<h2>Products:</h2>
+<hr>
+<h3>Bienvenido: {{user.first_name}} {{user.last_name}}</h3>
+<br>
+<h3>Email: {{user.email}}</h3>
+<h3>Age: {{user.age}}</h3>
+<h3>Role: {{user.rol}}</h3>
+<br>
+<hr>
+<br>
+{{#each products}}
+    <h4>{{title}}</h4>
+    <p>{{description}}</p>
+    <p>{{price}}</p>
+    <p>{{thumbnail}}</p>
+    <p>{{code}}</p>
+    <p>{{stock}}</p>
+    <p>{{category}}</p>
+    <button onclick="addProduct({{_id}})">add to cart</button>
+    <hr>
+{{/each}}
+
+<a href="/?page=1">First</a>
+
+{{#if hasPrevPage}}
+    <a href="/?page={{prevPage}}">Prev</a>
+{{/if}}
+
+{{#if hasNextPage}}
+    <a href="/?page={{nextPage}}">Next</a>
+{{/if}}
+
+<a href="/?page={{totalPages}}">Last</a>
