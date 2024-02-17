@@ -37,3 +37,26 @@ export const generateTicketCode = () =>{
     const id = crypto.randomBytes(20).toString('hex');
     return id
 }
+
+export class CustomError extends Error {
+    constructor(message, name, description, code) {
+        super(message);
+        this.name = name;
+        this.description = description;
+        this.code = code;
+    }
+}
+
+export const ErrorCodes = {
+    INTERNAL_SERVER_ERROR : {
+        name: 'INTERNAL_SERVER_ERROR',
+        description: 'Internal server error',
+        code: 500
+    },
+    PRODUCT_NOT_FOUND : {
+        name: 'PRODUCT_NOT_FOUND',
+        description: 'Product not found',
+        code: 404
+    },
+
+}

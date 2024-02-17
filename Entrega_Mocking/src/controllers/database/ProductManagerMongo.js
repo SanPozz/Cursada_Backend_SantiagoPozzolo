@@ -1,4 +1,5 @@
 import { productService } from "../../services/products.service.js";
+import { CustomError, ErrorCodes } from "../../utils.js";
 
 export class ProductManagerMongo {
     constructor(){}
@@ -21,6 +22,10 @@ export class ProductManagerMongo {
             sort && (options.sort = { price: sort})
     
             const products = await productService.getPaginatedProducts(query, options);
+
+            if (!products) {
+                throw new CustomError(ErrorCodes.INTERNAL_SERVER_ERROR.name, ErrorCodes.INTERNAL_SERVER_ERROR.description, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+            }
     
             res.setHeader('Content-Type', 'application/json');
             res.status(200).send(products);
@@ -41,8 +46,8 @@ export class ProductManagerMongo {
                 res.send(product);
 
             } else {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(404).send({ error: 'Product not found' });
+                
+                throw new CustomError(ErrorCodes.PRODUCT_NOT_FOUND.name, ErrorCodes.PRODUCT_NOT_FOUND.description, ErrorCodes.PRODUCT_NOT_FOUND.code);
             }
     
         } catch (error) {

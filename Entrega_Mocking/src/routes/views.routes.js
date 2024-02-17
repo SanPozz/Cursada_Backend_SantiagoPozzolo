@@ -3,6 +3,8 @@ import { Router } from "express";
 import Product from "../dao/models/products.models.js";
 import Cart from "../dao/models/carts.models.js";
 
+import { generateProductMocks } from "../dao/mocks/mockProducts.js";
+
 import { authLogged, authViews, authAdmin } from "../utils.js";
 
 const viewsRouter = Router();
@@ -80,6 +82,24 @@ viewsRouter.get('/profile', authViews, async (req, res) => {
     res.status(200).render('profile', {
         user: req.session.user
     });
+})
+
+viewsRouter.get('/mockingproducts', async (req, res) => {
+    const fakeProducts = [];
+
+    let limit = req.query.limit || 100
+
+    for (let i = 0; i < limit; i++) {
+        fakeProducts.push(generateProductMocks());
+    }
+
+    res.status(200).render('mockingproducts', {
+        products: fakeProducts
+    })
+
+    // res.status(200).render('mockingproducts', {
+    //     products
+    // })
 })
 
 viewsRouter.get('/*', async (req, res) => {
