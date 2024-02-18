@@ -21,8 +21,6 @@ export const initializatePassport = () => {
                 // return res.redirect('/register?error=All fields are required');
             }
 
-            console.log(req.cookies.cart);
-
             const userExist = await User.findOne({username});
 
             if (userExist) {

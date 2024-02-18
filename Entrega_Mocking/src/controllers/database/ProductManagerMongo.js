@@ -1,5 +1,6 @@
 import { productService } from "../../services/products.service.js";
 import { CustomError, ErrorCodes } from "../../utils.js";
+import mongoose from "mongoose";
 
 export class ProductManagerMongo {
     constructor(){}
@@ -24,7 +25,7 @@ export class ProductManagerMongo {
             const products = await productService.getPaginatedProducts(query, options);
 
             if (!products) {
-                throw new CustomError(ErrorCodes.INTERNAL_SERVER_ERROR.name, ErrorCodes.INTERNAL_SERVER_ERROR.description, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+                throw new CustomError(ErrorCodes.PRODUCT_NOT_FOUND.message, ErrorCodes.PRODUCT_NOT_FOUND.name, ErrorCodes.PRODUCT_NOT_FOUND.code);
             }
     
             res.setHeader('Content-Type', 'application/json');
@@ -32,7 +33,7 @@ export class ProductManagerMongo {
     
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: "Error during products search: " + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -40,19 +41,25 @@ export class ProductManagerMongo {
         const { pid } = req.params;
     
         try {
+
+            if (!mongoose.Types.ObjectId.isValid(pid)) {
+                throw new CustomError(ErrorCodes.INVALID_PRODUCT_ID.message, ErrorCodes.INVALID_PRODUCT_ID.name, ErrorCodes.INVALID_PRODUCT_ID.code);
+                
+            }
+
             const product = await productService.getProductByID(pid);
+
     
             if (product) {
                 res.send(product);
 
             } else {
-                
-                throw new CustomError(ErrorCodes.PRODUCT_NOT_FOUND.name, ErrorCodes.PRODUCT_NOT_FOUND.description, ErrorCodes.PRODUCT_NOT_FOUND.code);
+                throw new CustomError(ErrorCodes.PRODUCT_NOT_FOUND.message, ErrorCodes.PRODUCT_NOT_FOUND.name, ErrorCodes.PRODUCT_NOT_FOUND.code);
             }
     
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: "Error during product search: " + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 

@@ -39,10 +39,9 @@ export const generateTicketCode = () =>{
 }
 
 export class CustomError extends Error {
-    constructor(message, name, description, code) {
+    constructor(message, name, code) {
         super(message);
         this.name = name;
-        this.description = description;
         this.code = code;
     }
 }
@@ -50,13 +49,28 @@ export class CustomError extends Error {
 export const ErrorCodes = {
     INTERNAL_SERVER_ERROR : {
         name: 'INTERNAL_SERVER_ERROR',
-        description: 'Internal server error',
-        code: 500
+        message: 'Internal server error',
+        code: {status: 500, message: 'Internal Server Error'}
     },
     PRODUCT_NOT_FOUND : {
         name: 'PRODUCT_NOT_FOUND',
-        description: 'Product not found',
-        code: 404
+        message: 'Product not found',
+        code: {status: 404, message: 'Not Found'}
     },
+    INVALID_PRODUCT_ID : {
+        name: 'INVALID_PRODUCT_ID',
+        message: 'Invalid product ID',
+        code: {status: 400, message: 'Bad Request'}
+    },
+    INVALID_CART_ID : {
+        name: 'INVALID_CART_ID',
+        message: 'Invalid cart ID',
+        code: {status: 400, message: 'Bad Request'}
+    },
+    CART_NOT_FOUND : {
+        name: 'CART_NOT_FOUND',
+        message: 'Cart not found',
+        code: {status: 404, message: 'Not Found'}
+    }
 
 }

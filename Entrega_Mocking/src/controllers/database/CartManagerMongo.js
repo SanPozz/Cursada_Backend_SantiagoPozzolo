@@ -12,8 +12,8 @@ export class CartManagerMongo {
 
             if(!req.user.cart){
                 const newCart = await cartService.createCart();
-                req.user.cart = newCart._id;
-                // res.cookie('cart', newCart._id, {maxAge: 604800000, httpOnly: true});
+                // req.cookie.cart = newCart._id, {maxAge: 604800000, httpOnly: true};
+                res.cookie('cart', newCart._id, {maxAge: 604800000});
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200).send({ status: 'Cart created successfully', cart: newCart });
             } else {
@@ -31,19 +31,23 @@ export class CartManagerMongo {
         const { cid } = req.params;
     
         try {
+
+            if (!mongoose.Types.ObjectId.isValid(cid)) {
+                throw new CustomError(ErrorCodes.INVALID_CART_ID.message, ErrorCodes.INVALID_CART_ID.name, ErrorCodes.INVALID_CART_ID.code);
+            }
+
             const cart = await cartService.getCartByIDAndPopulate(cid);
     
             if (cart) {
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200).send(cart);
             } else {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(400).send({ error: 'Cart not found' });
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
             }
 
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: 'Error consulting database' + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -55,15 +59,11 @@ export class CartManagerMongo {
             const product = await productService.getProductByID(pid);
     
             if (!cart) {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(400).send({ error: 'Cart not found' });
-                return
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
             }
     
             if (!product) {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(400).send({ error: 'Product not found' });
-                return
+                throw new CustomError(ErrorCodes.PRODUCT_NOT_FOUND.message, ErrorCodes.PRODUCT_NOT_FOUND.name, ErrorCodes.PRODUCT_NOT_FOUND.code);
             }
     
             const productExist = cart.products.find(product => product.id_prod == pid)
@@ -81,7 +81,7 @@ export class CartManagerMongo {
     
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: 'Error adding product to cart: ' + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -89,7 +89,17 @@ export class CartManagerMongo {
         const { cid } = req.params;
     
         try {
+
+            if (!mongoose.Types.ObjectId.isValid(cid)) {
+                throw new CustomError(ErrorCodes.INVALID_CART_ID.message, ErrorCodes.INVALID_CART_ID.name, ErrorCodes.INVALID_CART_ID.code);
+            }
+
             const cart = await cartService.getCartByID(cid);
+
+            if (!cart) {
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
+            }
+
             cart.products = [];
             await cart.save();
 
@@ -98,7 +108,7 @@ export class CartManagerMongo {
             
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: 'Error deleting cart: ' + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -106,21 +116,29 @@ export class CartManagerMongo {
         const { cid, pid } = req.params;
     
         try {
-            const cart = await cartService.getCartByID(cid);
-    
-            if (cart) {
-                const productsFiltered = cart.products.filter(prod => prod.id_prod != pid);
-                cart.products = productsFiltered;
 
-                await cart.save()
-
-                res.setHeader('Content-Type', 'application/json');
-                res.status(200).send({ status: `Product with ${pid} was deleted` })
+            if (!mongoose.Types.ObjectId.isValid(cid)) {
+                throw new CustomError(ErrorCodes.INVALID_CART_ID.message, ErrorCodes.INVALID_CART_ID.name, ErrorCodes.INVALID_CART_ID.code);
             }
+
+            const cart = await cartService.getCartByID(cid);
+
+            if (!cart) {
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
+            }
+    
+            const productsFiltered = cart.products.filter(prod => prod.id_prod != pid);
+            cart.products = productsFiltered;
+
+            await cart.save()
+
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).send({ status: `Product with ${pid} was deleted` })
+
     
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: 'Error deleting product: ' + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -129,14 +147,23 @@ export class CartManagerMongo {
         const { data } = req.body;
 
         try {
+
+            if (!mongoose.Types.ObjectId.isValid(cid)) {
+                throw new CustomError(ErrorCodes.INVALID_CART_ID.message, ErrorCodes.INVALID_CART_ID.name, ErrorCodes.INVALID_CART_ID.code);
+            }
+
             const cart = await cartService.getCartByIDAndUpdate(cid, data);
+
+            if (!cart) {
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
+            }
 
             res.setHeader('Content-Type', 'application/json');
             res.status(200).send({ status: 'Cart updated successfully', cart });
             
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ error: 'Error updating cart: ' + error});
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
@@ -145,8 +172,17 @@ export class CartManagerMongo {
         const { quantity } = req.body;
     
         try {
+
+            if (!mongoose.Types.ObjectId.isValid(cid)) {
+                throw new CustomError(ErrorCodes.INVALID_CART_ID.message, ErrorCodes.INVALID_CART_ID.name, ErrorCodes.INVALID_CART_ID.code);
+            }
             
             const cart = await cartService.getCartByID(cid);
+
+            if (!cart) {
+                throw new CustomError(ErrorCodes.CART_NOT_FOUND.message, ErrorCodes.CART_NOT_FOUND.name, ErrorCodes.CART_NOT_FOUND.code);
+            }
+
             let productToUpdate = cart.products.find(prod => prod.id_prod == pid);
     
             productToUpdate.quantity = quantity;
@@ -157,7 +193,7 @@ export class CartManagerMongo {
     
         } catch (error) {
             res.setHeader('Content-Type', 'application/json');
-            res.status(400).send({ status: `Error: ${error}` });
+            res.status(error.code.status).send({ error_name: error.name, error_description: error.message, error_code: error.code });
         }
     }
 
