@@ -1,0 +1,4 @@
+error: undefined {"code":{"message":"Not Found","status":404},"name":"PRODUCT_NOT_FOUND"}
+error: undefined {"code":{"message":"Bad Request","status":400},"name":"INVALID_PRODUCT_ID"}
+error: undefined {"code":{"message":"Bad Request","status":400},"name":"INVALID_PRODUCT_ID"}
+error: undefined {"code":{"message":"Bad Request","status":400},"name":"INVALID_PRODUCT_ID"}
